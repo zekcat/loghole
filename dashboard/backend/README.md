@@ -6,7 +6,7 @@
 Request: 
 ```json
 {
-    "query": [
+    "params": [
         {
             "type": "key/column",
             "join": "OR/AND",
