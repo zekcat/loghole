@@ -54,7 +54,7 @@ func (r *ListEntryRequest) validateQueryParams() error {
 
 		return validation.ValidateStruct(param,
 			validation.Field(&param.Type, r.queryParamsTypeRules()...),
-			validation.Field(&param.Join, r.queryParamsTypeRules()...),
+			validation.Field(&param.Join, r.queryParamsJoinRules()...),
 			validation.Field(&param.Key, r.queryParamsKeyRules()...),
 			validation.Field(&param.Value, r.queryParamsValueRules()...),
 			validation.Field(&param.Operator, r.queryParamsOperatorRules()...),
@@ -67,7 +67,7 @@ func (r *ListEntryRequest) validateQueryParams() error {
 func (r *ListEntryRequest) limitRules() []validation.Rule {
 	return []validation.Rule{
 		validation.Min(int64(0)).ErrorCode(codes.ValidMinLimit.String()),
-		validation.Max(int64(1000)).ErrorCode(codes.ValidMaxLimit.String()),
+		validation.Max(int64(maxLimit)).ErrorCode(codes.ValidMaxLimit.String()),
 	}
 }
 
