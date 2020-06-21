@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/ClickHouse/clickhouse-go v1.4.0
+	github.com/Masterminds/squirrel v1.4.0
 	github.com/gadavy/ozzo-validation/v4 v4.3.2
 	github.com/gadavy/tracing v0.2.1
 	github.com/gorilla/mux v1.7.4

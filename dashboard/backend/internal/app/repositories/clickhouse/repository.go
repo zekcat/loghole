@@ -3,10 +3,7 @@ package clickhouse
 import (
 	"context"
 
-	"github.com/gadavy/tracing"
 	"github.com/jmoiron/sqlx"
-
-	"github.com/lissteron/loghole/dashboard/internal/app/domain"
 )
 
 type Logger interface {
@@ -27,15 +24,4 @@ type Repository struct {
 
 func NewRepository(db *sqlx.DB, logger Logger) *Repository {
 	return &Repository{db: db, logger: logger}
-}
-
-func (r *Repository) ListEntry(
-	ctx context.Context,
-	params [][]*domain.QueryParam,
-	limit,
-	offset int64,
-) ([]*domain.Entry, error) {
-	defer tracing.ChildSpan(&ctx).Finish()
-
-	return nil, nil
 }

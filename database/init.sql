@@ -9,8 +9,10 @@ CREATE TABLE logs.internal_logs (
   `trace_id` String,
   `message` String,
   `params` String,
-  `params.keys` Array(String),
-  `params.values` Array(String),
+  `params_string.keys` Array(String),
+  `params_string.values` Array(String),
+  `params_float.keys` Array(String),
+  `params_float.values` Array(Float64),
   `build_commit` String,
   `config_hash` String
 ) ENGINE = MergeTree()

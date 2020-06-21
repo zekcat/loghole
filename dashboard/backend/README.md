@@ -24,9 +24,13 @@ Request:
 Пример получения данных из базы:
 ```sql
 SELECT * FROM internal_logs 
-      ARRAY JOIN `params.keys` AS key,     -- только если есть json поля
-      arrayEnumerate(`params.keys`) AS idx -- только если есть json поля
-    WHERE key='n2' AND arrayElement(`params.values`, idx) LIKE '%v3%'
+      ARRAY JOIN `params_string.keys` AS key_string,     -- только если есть json поля
+      arrayEnumerate(`params_string.keys`) AS idx_string -- только если есть json поля
+      ARRAY JOIN `params_float.keys` AS key_float,     -- только если есть json поля
+      arrayEnumerate(`params_float.keys`) AS idx_float -- только если есть json поля
+
+    WHERE (key_string='n2' AND arrayElement(`params_string.values`, idx_string) LIKE '%v3%') AND
+          key_float='n3' AND arrayElement(`params_float.values`, idx_float) > 10
     ORDER BY time DESC
     LIMIT 5000, 1000;
 ```

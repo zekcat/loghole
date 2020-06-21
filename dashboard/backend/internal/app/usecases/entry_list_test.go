@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -176,7 +177,7 @@ func TestListLogs_prepareParams(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			usecase := ListEntry{}
 
-			result := usecase.prepareParams(tt.input)
+			result := usecase.prepareParams(context.TODO(), tt.input)
 
 			assert.Equal(t, tt.expectedRes, result)
 		})

@@ -20,7 +20,7 @@ type Logger interface {
 type BaseResponse struct {
 	Status int         `json:"-"`
 	Errors []RespError `json:"errors"`
-	Data   interface{} `json:"data,omitempty"`
+	Data   interface{} `json:"data"`
 }
 
 type RespError struct {

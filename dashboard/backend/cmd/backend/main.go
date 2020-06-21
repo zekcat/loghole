@@ -44,11 +44,15 @@ func main() {
 
 	traceLogger := tracing.NewTraceLogger(logger)
 
+	logger.Info("initClickhouse start")
+
 	// Init clients
 	clickhousedb, err := initClickhouse()
 	if err != nil {
 		logger.Fatalf("init clickhouse db client failed: %v", err)
 	}
+
+	logger.Info("clickhouse inited")
 
 	// Init repositories
 	entryRepository := clickhouse.NewRepository(clickhousedb.Client(), traceLogger)
@@ -110,7 +114,6 @@ func initLogger() (*zap.SugaredLogger, error) {
 	return log.NewLogger(
 		log.SetLevel(viper.GetString("LOGGER_LEVEL")),
 		log.AddCaller(),
-		log.AddFile(viper.GetString("LOGGER_FILE_PATH")),
 	)
 }
 
