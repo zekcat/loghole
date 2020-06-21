@@ -54,7 +54,7 @@ func (r *Repository) buildListEntryQuery(
 ) (query string, args []interface{}, err error) {
 	defer tracing.ChildSpan(&ctx).Finish()
 
-	where, args := buildListEntryWhere(params)
+	where, args := buildListEntryWhere(ctx, params)
 
 	return squirrel.Select("time", "nsec", "namespace", "source", "host",
 		"trace_id", "message", "params", "build_commit", "config_hash").
@@ -66,7 +66,9 @@ func (r *Repository) buildListEntryQuery(
 		ToSql()
 }
 
-func buildListEntryWhere(params [][]*domain.QueryParam) (where string, args []interface{}) {
+func buildListEntryWhere(ctx context.Context, params [][]*domain.QueryParam) (where string, args []interface{}) {
+	defer tracing.ChildSpan(&ctx).Finish()
+
 	builder := make([]string, 0, len(params))
 	args = make([]interface{}, 0)
 
