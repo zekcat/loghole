@@ -2,8 +2,9 @@ package clickhouse
 
 import (
 	"context"
-	"log"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/lissteron/loghole/dashboard/internal/app/domain"
 )
@@ -13,6 +14,7 @@ func TestRepository_buildListEntryQuery(t *testing.T) {
 		name          string
 		input         [][]*domain.QueryParam
 		expectedQuery string
+		expectedArgs   []interface{}
 	}{
 		{
 			name: "#1",
@@ -27,7 +29,8 @@ func TestRepository_buildListEntryQuery(t *testing.T) {
 					},
 				},
 			},
-			expectedQuery: "SELECT * FROM internal_logs_buffer WHERE (namespace='prod') ORDER BY time DESC LIMIT 0, 100",
+			expectedQuery: "SELECT time, nsec, namespace, source, host, trace_id, message, params, build_commit, config_hash FROM internal_logs_buffer WHERE (namespace=?) ORDER BY time DESC LIMIT 0, 100",
+			expectedArgs:  []interface{}{"prod"},
 		},
 		{
 			name: "#2",
@@ -65,7 +68,8 @@ func TestRepository_buildListEntryQuery(t *testing.T) {
 					},
 				},
 			},
-			expectedQuery: "SELECT * FROM internal_logs_buffer WHERE (namespace='prod') ORDER BY time DESC LIMIT 0, 100",
+			expectedQuery: "SELECT time, nsec, namespace, source, host, trace_id, message, params, build_commit, config_hash FROM internal_logs_buffer WHERE (namespace=? AND time>?) OR (time<? AND (has(params_float.keys, 'kf2') AND params_float.values[indexOf(params_float.keys, 'kf2')] < ?)) ORDER BY time DESC LIMIT 0, 100",
+			expectedArgs:  []interface{}{"prod", "2020-06-23 10:22:59", "2020-06-23 10:22:59", float64(55)},
 		},
 	}
 	for _, tt := range tests {
@@ -77,8 +81,8 @@ func TestRepository_buildListEntryQuery(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			log.Println(query)
-			log.Println(args)
+			assert.Equal(t, tt.expectedQuery, query)
+			assert.Equal(t, tt.expectedArgs, args)
 		})
 	}
 }
