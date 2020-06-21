@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
@@ -13,8 +14,8 @@ import (
 )
 
 const (
-	stringParams = "(has(params_string.keys, '%s') AND params_string.values[indexOf(params_string.keys, '%s')] %s '%s')"
-	floatParams  = "(has(params_float.keys, '%s') AND params_float.values[indexOf(params_float.keys, '%s')] %s %s)"
+	stringParams = "(has(params_string.keys, '%s') AND params_string.values[indexOf(params_string.keys, '%s')] %s ?)"
+	floatParams  = "(has(params_float.keys, '%s') AND params_float.values[indexOf(params_float.keys, '%s')] %s ?)"
 )
 
 func (r *Repository) ListEntry(
@@ -25,14 +26,14 @@ func (r *Repository) ListEntry(
 ) ([]*domain.Entry, error) {
 	defer tracing.ChildSpan(&ctx).Finish()
 
-	query, _, err := r.buildListEntryQuery(ctx, params, limit, offset)
+	query, args, err := r.buildListEntryQuery(ctx, params, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
 	var dest []*models.Entry
 
-	if err := r.db.SelectContext(ctx, &dest, query); err != nil {
+	if err := r.db.SelectContext(ctx, &dest, query, args...); err != nil {
 		return nil, err
 	}
 
@@ -53,49 +54,64 @@ func (r *Repository) buildListEntryQuery(
 ) (query string, args []interface{}, err error) {
 	defer tracing.ChildSpan(&ctx).Finish()
 
+	where, args := r.buildListEntryWhere(params)
+
 	return squirrel.Select("time", "nsec", "namespace", "source", "host",
 		"trace_id", "message", "params", "build_commit", "config_hash").
 		From("internal_logs_buffer").
-		Where(r.buildListEntryWhere(params)).
+		Where(where, args...).
 		OrderBy("time DESC").
 		Suffix(fmt.Sprintf("LIMIT %d, %d", offset, limit)).
-		PlaceholderFormat(squirrel.Dollar).
+		PlaceholderFormat(squirrel.Question).
 		ToSql()
 }
 
-func (r *Repository) buildListEntryWhere(params [][]*domain.QueryParam) (where string) {
+func (r *Repository) buildListEntryWhere(params [][]*domain.QueryParam) (where string, args []interface{}) {
 	builder := make([]string, 0, len(params))
+	args = make([]interface{}, 0)
 
 	for _, list := range params {
-		builder = append(builder, r.prepareParamList(list))
+		q, arg := r.prepareParamList(list)
+
+		builder = append(builder, q)
+		args = append(args, arg...)
 	}
 
-	return strings.Join(builder, " OR ")
+	return strings.Join(builder, " OR "), args
 }
 
-func (r *Repository) prepareParamList(list []*domain.QueryParam) (where string) {
+func (r *Repository) prepareParamList(list []*domain.QueryParam) (where string, args []interface{}) {
 	builder := make([]string, 0, len(list))
+	args = make([]interface{}, 0)
 
 	for _, param := range list {
-		builder = append(builder, r.prepareParam(param))
+		q, arg := r.prepareParam(param)
+
+		builder = append(builder, q)
+		args = append(args, arg)
 	}
 
-	return strings.Join([]string{"(", strings.Join(builder, " AND "), ")"}, "")
+	return strings.Join([]string{"(", strings.Join(builder, " AND "), ")"}, ""), args
 }
 
-func (r *Repository) prepareParam(param *domain.QueryParam) string {
+func (r *Repository) prepareParam(param *domain.QueryParam) (q string, arg interface{}) {
 	if param.Type == domain.TypeKey {
 		return r.prepareJSONParam(param)
 	}
 
-	return strings.Join([]string{param.Key, param.Operator, "'", param.Value, "'"}, "")
+	return strings.Join([]string{param.Key, param.Operator, "?"}, ""), param.Value
 }
 
-func (r *Repository) prepareJSONParam(param *domain.QueryParam) string {
+func (r *Repository) prepareJSONParam(param *domain.QueryParam) (q string, arg interface{}) {
 	switch param.Operator {
 	case "<", ">":
-		return fmt.Sprintf(floatParams, param.Key, param.Key, param.Operator, param.Value)
+		val, err := strconv.ParseFloat(param.Value, 64)
+		if err != nil {
+			val = 0
+		}
+
+		return fmt.Sprintf(floatParams, param.Key, param.Key, param.Operator), val
 	default:
-		return fmt.Sprintf(stringParams, param.Key, param.Key, param.Operator, param.Value)
+		return fmt.Sprintf(stringParams, param.Key, param.Key, param.Operator), param.Value
 	}
 }
