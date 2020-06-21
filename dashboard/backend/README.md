@@ -1,3 +1,15 @@
+## Конфигурация
+
+|Параметр           |Пример        |
+|:------------------|:-------------|
+|SERVICE_HTTP_PORT  |8080          |
+|LOGGER_LEVEL       |info          |
+|JAEGER_URI         |127.0.0.1:6831|
+|CLICKHOUSE_URI     |127.0.0.1:9500|
+|CLICKHOUSE_USER    |user          |
+|CLICKHOUSE_DATABASE|password      |
+
+
 Проксируем запросы к базе <br />
 Проверяем запросы к базе <br />
 Если что то не так - шлем нахрен

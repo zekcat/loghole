@@ -67,12 +67,7 @@ func main() {
 	)
 
 	// Init http server
-	srv := server.NewHTTP(
-		fmt.Sprintf("0.0.0.0:%s", viper.GetString("SERVICE_HTTP_PORT")),
-		server.WithReadTimeout(time.Minute),
-		server.WithWriteTimeout(time.Minute),
-		server.WithIdleTimeout(time.Minute*10), // nolint:gomnd,gocritic
-	)
+	srv := initHTTPServer()
 
 	// Init v1 routes
 	r := srv.Router()
@@ -130,5 +125,14 @@ func initClickhouse() (*clickhouseclient.Client, error) {
 		viper.GetString("CLICKHOUSE_URI"),
 		viper.GetString("CLICKHOUSE_USER"),
 		viper.GetString("CLICKHOUSE_DATABASE"),
+	)
+}
+
+func initHTTPServer() *server.HTTP {
+	return server.NewHTTP(
+		fmt.Sprintf("0.0.0.0:%s", viper.GetString("SERVICE_HTTP_PORT")),
+		server.WithReadTimeout(time.Minute),
+		server.WithWriteTimeout(time.Minute),
+		server.WithIdleTimeout(time.Minute*10), // nolint:gomnd,gocritic
 	)
 }
