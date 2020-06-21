@@ -54,7 +54,7 @@ func (r *Repository) buildListEntryQuery(
 ) (query string, args []interface{}, err error) {
 	defer tracing.ChildSpan(&ctx).Finish()
 
-	where, args := r.buildListEntryWhere(params)
+	where, args := buildListEntryWhere(params)
 
 	return squirrel.Select("time", "nsec", "namespace", "source", "host",
 		"trace_id", "message", "params", "build_commit", "config_hash").
@@ -66,52 +66,40 @@ func (r *Repository) buildListEntryQuery(
 		ToSql()
 }
 
-func (r *Repository) buildListEntryWhere(params [][]*domain.QueryParam) (where string, args []interface{}) {
+func buildListEntryWhere(params [][]*domain.QueryParam) (where string, args []interface{}) {
 	builder := make([]string, 0, len(params))
 	args = make([]interface{}, 0)
 
 	for _, list := range params {
-		q, arg := r.prepareParamList(list)
+		buf := make([]string, 0, len(list))
 
-		builder = append(builder, q)
-		args = append(args, arg...)
+		for _, param := range list {
+			q, arg := prepareListEntryParam(param)
+
+			args, buf = append(args, arg), append(buf, q)
+		}
+
+		builder = append(builder, strings.Join([]string{"(", strings.Join(buf, " AND "), ")"}, ""))
 	}
 
 	return strings.Join(builder, " OR "), args
 }
 
-func (r *Repository) prepareParamList(list []*domain.QueryParam) (where string, args []interface{}) {
-	builder := make([]string, 0, len(list))
-	args = make([]interface{}, 0)
-
-	for _, param := range list {
-		q, arg := r.prepareParam(param)
-
-		builder = append(builder, q)
-		args = append(args, arg)
-	}
-
-	return strings.Join([]string{"(", strings.Join(builder, " AND "), ")"}, ""), args
-}
-
-func (r *Repository) prepareParam(param *domain.QueryParam) (q string, arg interface{}) {
+func prepareListEntryParam(param *domain.QueryParam) (q string, arg interface{}) {
 	if param.Type == domain.TypeKey {
-		return r.prepareJSONParam(param)
+		return prepareListEntryJSONParam(param)
 	}
 
 	return strings.Join([]string{param.Key, param.Operator, "?"}, ""), param.Value
 }
 
-func (r *Repository) prepareJSONParam(param *domain.QueryParam) (q string, arg interface{}) {
-	switch param.Operator {
-	case "<", ">":
-		val, err := strconv.ParseFloat(param.Value, 64)
-		if err != nil {
-			val = 0
+func prepareListEntryJSONParam(param *domain.QueryParam) (q string, arg interface{}) {
+	if param.Operator == "<" || param.Operator == ">" {
+		value, err := strconv.ParseFloat(param.Value, 64)
+		if err == nil {
+			return fmt.Sprintf(floatParams, param.Key, param.Key, param.Operator), value
 		}
-
-		return fmt.Sprintf(floatParams, param.Key, param.Key, param.Operator), val
-	default:
-		return fmt.Sprintf(stringParams, param.Key, param.Key, param.Operator), param.Value
 	}
+
+	return fmt.Sprintf(stringParams, param.Key, param.Key, param.Operator), param.Value
 }
