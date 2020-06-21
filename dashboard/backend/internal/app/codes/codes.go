@@ -2,8 +2,44 @@ package codes
 
 import (
 	"net/http"
+	"strconv"
+)
+
+const (
+	systemCodes     = 1000
+	validationCodes = 200_000
+)
+
+const (
+	DatabaseError = systemCodes + iota
 )
 
 func ToHTTP(code int) int {
-	return http.StatusInternalServerError
+	switch code {
+	case DatabaseError:
+		return http.StatusInternalServerError
+	default:
+		return http.StatusTeapot
+	}
 }
+
+// Validation error codes
+type Code int
+
+func (s Code) String() string {
+	return strconv.Itoa(int(s))
+}
+
+const (
+	ValidMinLimit Code = validationCodes + iota
+	ValidMaxLimit
+	ValidMixOffset
+	ValidQueryParamsTypeRequired
+	ValidQueryParamsTypeIn
+	ValidQueryParamsJoinRequired
+	ValidQueryParamsJoinIn
+	ValidQueryParamsKeyRequired
+	ValidQueryParamsValueRequired
+	ValidQueryParamsOperatorRequired
+	ValidQueryParamsOperatorIn
+)

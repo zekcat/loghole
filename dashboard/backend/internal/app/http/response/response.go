@@ -51,6 +51,8 @@ func (r *BaseResponse) SetData(v interface{}) {
 func (r *BaseResponse) ParseError(err error) {
 	switch e1 := err.(type) {
 	case validation.Errors:
+		r.Status = http.StatusBadRequest
+
 		for field, e2 := range e1 {
 			if e3, ok := e2.(validation.Error); ok {
 				r.Errors = append(r.Errors, RespError{

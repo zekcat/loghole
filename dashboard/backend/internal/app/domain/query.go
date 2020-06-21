@@ -23,10 +23,3 @@ type QueryParam struct {
 	Value    string `json:"value"`
 	Operator string `json:"operator"`
 }
-
-/*
-SELECT * FROM (
-    SELECT * FROM internal_logs ARRAY JOIN `params_string`
-) ARRAY JOIN `params_float` WHERE (params_string.keys='ks1' AND `params_string.values` = 'vs3') AND (params_float.keys='kf1' AND `params_float.values` > 0)
-
- */

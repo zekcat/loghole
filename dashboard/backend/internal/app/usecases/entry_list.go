@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/gadavy/tracing"
+	"github.com/lissteron/simplerr"
 
+	"github.com/lissteron/loghole/dashboard/internal/app/codes"
 	"github.com/lissteron/loghole/dashboard/internal/app/domain"
 	"github.com/lissteron/loghole/dashboard/internal/app/usecases/interfaces"
 )
@@ -36,7 +38,8 @@ func (l *ListEntry) Do(ctx context.Context, input *ListEntryIn) ([]*domain.Entry
 
 	result, err := l.storage.ListEntry(ctx, params, input.Limit, input.Offset)
 	if err != nil {
-		return nil, err
+		l.logger.Errorf(ctx, "get entry list failed: %v", err)
+		return nil, simplerr.WrapWithCode(err, codes.DatabaseError, "get entry list failed")
 	}
 
 	return result, nil
