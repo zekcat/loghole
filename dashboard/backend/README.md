@@ -21,9 +21,11 @@ Request:
     "params": [
         {
             "type": "key/column",
-            "join": "OR/AND",
             "key": "p1",
-            "value": "120",
+            "value": {
+                "item": "v1",                    // ?
+                "list": ["v1_1", "v1_2", "v1_3"] // IN (?, ?, ?)
+            },
             "operator": ">="
         }
     ],
@@ -32,14 +34,18 @@ Request:
 }
 ```
 
+ЕСЛИ value == list && (operator == LIKE || operator == NOT LIKE)
+
+SELECT * FROM internal_logs WHERE (p1 LIKE v1_1 OR p1 LIKE v1_2 OR p1 LIKE v1_3)
+
 ---
 Пример получения данных из базы:
 ```sql
 SELECT * FROM internal_logs 
       ARRAY JOIN `params_string.keys` AS key_string,     -- только если есть json поля
       arrayEnumerate(`params_string.keys`) AS idx_string -- только если есть json поля
-      ARRAY JOIN `params_float.keys` AS key_float,     -- только если есть json поля
-      arrayEnumerate(`params_float.keys`) AS idx_float -- только если есть json поля
+      ARRAY JOIN `params_float.keys` AS key_float,       -- только если есть json поля
+      arrayEnumerate(`params_float.keys`) AS idx_float   -- только если есть json поля
 
     WHERE (key_string='n2' AND arrayElement(`params_string.values`, idx_string) LIKE '%v3%') AND
           key_float='n3' AND arrayElement(`params_float.values`, idx_float) > 10
@@ -66,7 +72,7 @@ Response:
             "host": "",
             "trace_id": "",
             "message": "",
-            "params": "",
+            "params": {},
             "build_commit": "",
             "config_hash": ""
         }
@@ -74,3 +80,10 @@ Response:
 }
 ```
 
+## Методы
+
+api/v1/entry/list
+
+api/v1/suggest/namespace 
+api/v1/suggest/source
+api/v1/suggest/host      --> "value": "v1" (host LIKE %v1%) --> "data": ["a", "b", "c"]

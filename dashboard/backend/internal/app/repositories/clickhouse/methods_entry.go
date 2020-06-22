@@ -3,8 +3,6 @@ package clickhouse
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/gadavy/tracing"
@@ -13,20 +11,10 @@ import (
 	"github.com/lissteron/loghole/dashboard/internal/app/repositories/clickhouse/models"
 )
 
-const (
-	stringParams = "(has(params_string.keys, '%s') AND params_string.values[indexOf(params_string.keys, '%s')] %s ?)"
-	floatParams  = "(has(params_float.keys, '%s') AND params_float.values[indexOf(params_float.keys, '%s')] %s ?)"
-)
-
-func (r *Repository) ListEntry(
-	ctx context.Context,
-	params [][]*domain.QueryParam,
-	limit,
-	offset int64,
-) ([]*domain.Entry, error) {
+func (r *Repository) ListEntry(ctx context.Context, input *domain.Query) ([]*domain.Entry, error) {
 	defer tracing.ChildSpan(&ctx).Finish()
 
-	query, args, err := r.buildListEntryQuery(ctx, params, limit, offset)
+	query, args, err := buildListEntryQuery(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -46,62 +34,21 @@ func (r *Repository) ListEntry(
 	return result, nil
 }
 
-func (r *Repository) buildListEntryQuery(
+func buildListEntryQuery(
 	ctx context.Context,
-	params [][]*domain.QueryParam,
-	limit,
-	offset int64,
+	input *domain.Query,
 ) (query string, args []interface{}, err error) {
 	defer tracing.ChildSpan(&ctx).Finish()
 
-	where, args := buildListEntryWhere(ctx, params)
+	builder := squirrel.Select("time", "nsec", "namespace", "source", "host",
+		"trace_id", "message", "params", "build_commit", "config_hash").From("internal_logs_buffer")
 
-	return squirrel.Select("time", "nsec", "namespace", "source", "host",
-		"trace_id", "message", "params", "build_commit", "config_hash").
-		From("internal_logs_buffer").
-		Where(where, args...).
-		OrderBy("time DESC").
-		Suffix(fmt.Sprintf("LIMIT %d, %d", offset, limit)).
+	for _, param := range input.Params {
+		builder = builder.Where(models.ParamFromDomain(param))
+	}
+
+	return builder.OrderBy("time DESC").
+		Suffix(fmt.Sprintf("LIMIT %d, %d", input.Offset, input.Limit)).
 		PlaceholderFormat(squirrel.Question).
 		ToSql()
-}
-
-func buildListEntryWhere(ctx context.Context, params [][]*domain.QueryParam) (where string, args []interface{}) {
-	defer tracing.ChildSpan(&ctx).Finish()
-
-	builder := make([]string, 0, len(params))
-	args = make([]interface{}, 0)
-
-	for _, list := range params {
-		buf := make([]string, 0, len(list))
-
-		for _, param := range list {
-			q, arg := prepareListEntryParam(param)
-
-			args, buf = append(args, arg), append(buf, q)
-		}
-
-		builder = append(builder, strings.Join([]string{"(", strings.Join(buf, " AND "), ")"}, ""))
-	}
-
-	return strings.Join(builder, " OR "), args
-}
-
-func prepareListEntryParam(param *domain.QueryParam) (q string, arg interface{}) {
-	if param.Type == domain.TypeKey {
-		return prepareListEntryJSONParam(param)
-	}
-
-	return strings.Join([]string{param.Key, param.Operator, "?"}, ""), param.Value
-}
-
-func prepareListEntryJSONParam(param *domain.QueryParam) (q string, arg interface{}) {
-	if param.Operator == "<" || param.Operator == ">" {
-		value, err := strconv.ParseFloat(param.Value, 64)
-		if err == nil {
-			return fmt.Sprintf(floatParams, param.Key, param.Key, param.Operator), value
-		}
-	}
-
-	return fmt.Sprintf(stringParams, param.Key, param.Key, param.Operator), param.Value
 }

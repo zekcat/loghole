@@ -6,8 +6,10 @@ const (
 )
 
 const (
-	JoinOr  = "OR"
-	JoinAnd = "AND"
+	OperatorIn      = "IN"
+	OperatorNotIn   = "NOT IN"
+	OperatorLike    = "LIKE"
+	OperatorNotLike = "NOT LIKE"
 )
 
 type Query struct {
@@ -17,9 +19,17 @@ type Query struct {
 }
 
 type QueryParam struct {
-	Type     string `json:"type"`
-	Join     string `json:"join"`
-	Key      string `json:"key"`
-	Value    string `json:"value"`
-	Operator string `json:"operator"`
+	Type     string     `json:"type"`
+	Key      string     `json:"key"`
+	Value    ParamValue `json:"value"`
+	Operator string     `json:"operator"`
+}
+
+func (p *QueryParam) IsTypeJSON() bool {
+	return p.Type == TypeKey
+}
+
+type ParamValue struct {
+	Item string   `json:"item"`
+	List []string `json:"list"`
 }

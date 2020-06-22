@@ -18,5 +18,5 @@ type Logger interface {
 }
 
 type Storage interface {
-	ListEntry(ctx context.Context, params [][]*domain.QueryParam, limit, offset int64) ([]*domain.Entry, error)
+	ListEntry(ctx context.Context, query *domain.Query) ([]*domain.Entry, error)
 }

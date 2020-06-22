@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"context"
-	"strings"
 
 	"github.com/gadavy/tracing"
 	"github.com/lissteron/simplerr"
@@ -34,42 +33,11 @@ func NewListEntry(
 func (l *ListEntry) Do(ctx context.Context, input *ListEntryIn) ([]*domain.Entry, error) {
 	defer tracing.ChildSpan(&ctx).Finish()
 
-	params := l.prepareParams(ctx, input.Params)
-
-	result, err := l.storage.ListEntry(ctx, params, input.Limit, input.Offset)
+	result, err := l.storage.ListEntry(ctx, input.Query)
 	if err != nil {
 		l.logger.Errorf(ctx, "get entry list failed: %v", err)
 		return nil, simplerr.WrapWithCode(err, codes.DatabaseError, "get entry list failed")
 	}
 
 	return result, nil
-}
-
-func (l *ListEntry) prepareParams(ctx context.Context, params []*domain.QueryParam) (prepared [][]*domain.QueryParam) {
-	defer tracing.ChildSpan(&ctx).Finish()
-
-	var counter = 1
-
-	for idx, val := range params {
-		if val.Join == domain.JoinOr && idx != 0 {
-			counter++
-		}
-	}
-
-	prepared = make([][]*domain.QueryParam, counter)
-
-	counter = 0
-
-	for _, val := range params {
-		switch strings.ToUpper(val.Join) {
-		case domain.JoinOr:
-			counter++
-		case "":
-			val.Join = domain.JoinAnd
-		}
-
-		prepared[counter] = append(prepared[counter], val)
-	}
-
-	return prepared
 }

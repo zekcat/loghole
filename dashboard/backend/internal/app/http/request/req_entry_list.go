@@ -50,13 +50,11 @@ func (r *ListEntryRequest) ToInput() *usecases.ListEntryIn {
 func (r *ListEntryRequest) validateQueryParams() error {
 	for _, param := range r.Params {
 		param.Type = strings.ToLower(param.Type)
-		param.Join = strings.ToUpper(param.Join)
 
 		return validation.ValidateStruct(param,
 			validation.Field(&param.Type, r.queryParamsTypeRules()...),
-			validation.Field(&param.Join, r.queryParamsJoinRules()...),
 			validation.Field(&param.Key, r.queryParamsKeyRules()...),
-			validation.Field(&param.Value, r.queryParamsValueRules()...),
+			// validation.Field(&param.Value, r.queryParamsValueRules()...),
 			validation.Field(&param.Operator, r.queryParamsOperatorRules()...),
 		)
 	}
@@ -84,13 +82,6 @@ func (r *ListEntryRequest) queryParamsTypeRules() []validation.Rule {
 	}
 }
 
-func (r *ListEntryRequest) queryParamsJoinRules() []validation.Rule {
-	return []validation.Rule{
-		validation.Required.ErrorCode(codes.ValidQueryParamsJoinRequired.String()),
-		validation.In(domain.JoinOr, domain.JoinAnd).ErrorCode(codes.ValidQueryParamsJoinIn.String()),
-	}
-}
-
 func (r *ListEntryRequest) queryParamsKeyRules() []validation.Rule {
 	return []validation.Rule{
 		validation.Required.ErrorCode(codes.ValidQueryParamsKeyRequired.String()),
@@ -106,7 +97,7 @@ func (r *ListEntryRequest) queryParamsValueRules() []validation.Rule {
 func (r *ListEntryRequest) queryParamsOperatorRules() []validation.Rule {
 	return []validation.Rule{
 		validation.Required.ErrorCode(codes.ValidQueryParamsOperatorRequired.String()),
-		validation.In("<", "<=", ">=", "<>", ">", "!=", "=", "LIKE").
+		validation.In("<", "<=", ">=", "<>", ">", "!=", "=", "LIKE", "NOT LIKE").
 			ErrorCode(codes.ValidQueryParamsOperatorIn.String()),
 	}
 }
