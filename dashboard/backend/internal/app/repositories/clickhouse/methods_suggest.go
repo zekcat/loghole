@@ -2,10 +2,11 @@ package clickhouse
 
 import (
 	"context"
-	"strings"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/gadavy/tracing"
+
+	"github.com/lissteron/loghole/dashboard/internal/app/repositories/clickhouse/tools"
 )
 
 func (r *Repository) ListNamespaceSuggest(ctx context.Context, value string) ([]string, error) {
@@ -35,13 +36,11 @@ func (r *Repository) ListLevelSuggest(ctx context.Context, value string) ([]stri
 func (r *Repository) listSuggest(ctx context.Context, column, value string) ([]string, error) {
 	builder := squirrel.
 		Select(column).
-		From("internal_logs_buffer")
+		From("internal_logs_buffer").
+		GroupBy(column)
 
 	if value != "" {
-		builder = builder.Where(
-			strings.Join([]string{column, " LIKE ?"}, ""),
-			strings.Join([]string{"%", value, "%"}, ""),
-		)
+		builder = builder.Where(squirrel.Like{column: tools.CreateLike(value)})
 	}
 
 	query, args, err := builder.PlaceholderFormat(squirrel.Question).ToSql()
