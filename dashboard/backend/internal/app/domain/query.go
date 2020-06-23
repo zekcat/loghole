@@ -13,16 +13,16 @@ const (
 )
 
 type Query struct {
-	Params []*QueryParam `json:"params"`
-	Limit  int64         `json:"limit"`
-	Offset int64         `json:"offset"`
+	Params []*QueryParam
+	Limit  int64
+	Offset int64
 }
 
 type QueryParam struct {
-	Type     string     `json:"type"`
-	Key      string     `json:"key"`
-	Value    ParamValue `json:"value"`
-	Operator string     `json:"operator"`
+	Type     string
+	Key      string
+	Value    ParamValue
+	Operator string
 }
 
 func (p *QueryParam) IsTypeJSON() bool {
@@ -30,6 +30,6 @@ func (p *QueryParam) IsTypeJSON() bool {
 }
 
 type ParamValue struct {
-	Item string   `json:"item"`
-	List []string `json:"list"`
+	Item string
+	List []string
 }

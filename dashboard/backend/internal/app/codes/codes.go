@@ -13,6 +13,7 @@ const (
 
 const (
 	DatabaseError = systemCodes + iota
+	InvalidJSONError
 )
 
 const (
@@ -23,6 +24,8 @@ func ToHTTP(code int) int {
 	switch code {
 	case DatabaseError:
 		return http.StatusInternalServerError
+	case InvalidJSONError, InvalidSuggestType:
+		return http.StatusBadRequest
 	default:
 		return http.StatusTeapot
 	}
@@ -43,6 +46,10 @@ const (
 	ValidQueryParamsTypeIn
 	ValidQueryParamsKeyRequired
 	ValidQueryParamsValueRequired
+	ValidQueryParamsValueItemRequired
+	ValidQueryParamsValueItemEmpty
+	ValidQueryParamsValueListRequired
+	ValidQueryParamsValueListEmpty
 	ValidQueryParamsOperatorRequired
 	ValidQueryParamsOperatorIn
 	ValidSuggestTypeIn

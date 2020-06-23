@@ -35,7 +35,7 @@ func (h *EntryHandlers) ListEntryHandler(w http.ResponseWriter, r *http.Request)
 
 	req, err := request.ReadListEntryRequest(r)
 	if err != nil {
-		h.logger.Error(ctx, "read request failed: %v", err)
+		h.logger.Errorf(ctx, "read request failed: %v", err)
 		resp.ParseError(err)
 
 		return
@@ -43,7 +43,7 @@ func (h *EntryHandlers) ListEntryHandler(w http.ResponseWriter, r *http.Request)
 
 	result, err := h.listEntry.Do(ctx, req.ToInput())
 	if err != nil {
-		h.logger.Error(ctx, "do failed: %v", err)
+		h.logger.Errorf(ctx, "do failed: %v", err)
 		resp.ParseError(err)
 
 		return

@@ -59,6 +59,8 @@ func (r *BaseResponse) ParseError(err error) {
 					Code:   e3.Code(),
 					Detail: strings.Join([]string{field, e3.Error()}, ": "),
 				})
+			} else {
+				r.ParseError(e2)
 			}
 		}
 	default:

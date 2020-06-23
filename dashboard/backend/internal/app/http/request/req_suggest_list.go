@@ -6,6 +6,7 @@ import (
 
 	validation "github.com/gadavy/ozzo-validation/v4"
 	"github.com/gorilla/mux"
+	"github.com/lissteron/simplerr"
 
 	"github.com/lissteron/loghole/dashboard/internal/app/codes"
 	"github.com/lissteron/loghole/dashboard/internal/app/domain"
@@ -21,7 +22,7 @@ func ReadListSuggestRequest(r *http.Request) (*ListSuggestRequest, error) {
 	req := &ListSuggestRequest{Type: mux.Vars(r)["type"]}
 
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-		return nil, err
+		return nil, simplerr.WrapWithCode(err, codes.InvalidJSONError, "invalid json struct")
 	}
 
 	if err := req.Validate(); err != nil {

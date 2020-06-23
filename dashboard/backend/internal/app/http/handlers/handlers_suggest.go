@@ -34,7 +34,7 @@ func (h *SuggestHandlers) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 	req, err := request.ReadListSuggestRequest(r)
 	if err != nil {
-		h.logger.Error(ctx, "read request failed: %v", err)
+		h.logger.Errorf(ctx, "read request failed: %v", err)
 		resp.ParseError(err)
 
 		return
@@ -42,7 +42,7 @@ func (h *SuggestHandlers) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.listSuggest.Do(ctx, req.ToInput())
 	if err != nil {
-		h.logger.Error(ctx, "do failed: %v", err)
+		h.logger.Errorf(ctx, "do failed: %v", err)
 		resp.ParseError(err)
 
 		return
