@@ -7,11 +7,16 @@ import (
 
 const (
 	systemCodes     = 1000
+	usecasesCodes   = 2000
 	validationCodes = 200_000
 )
 
 const (
 	DatabaseError = systemCodes + iota
+)
+
+const (
+	InvalidSuggestType = usecasesCodes + iota
 )
 
 func ToHTTP(code int) int {
@@ -36,10 +41,10 @@ const (
 	ValidMixOffset
 	ValidQueryParamsTypeRequired
 	ValidQueryParamsTypeIn
-	ValidQueryParamsJoinRequired
-	ValidQueryParamsJoinIn
 	ValidQueryParamsKeyRequired
 	ValidQueryParamsValueRequired
 	ValidQueryParamsOperatorRequired
 	ValidQueryParamsOperatorIn
+	ValidSuggestTypeIn
+	ValidSuggestValueLength
 )

@@ -6,6 +6,7 @@ CREATE TABLE logs.internal_logs (
   `namespace` LowCardinality(String), 
   `source` LowCardinality(String), 
   `host` LowCardinality(String),
+  `level` LowCardinality(String),
   `trace_id` String,
   `message` String,
   `params` String,

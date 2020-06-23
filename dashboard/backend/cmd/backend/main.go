@@ -44,26 +44,24 @@ func main() {
 
 	traceLogger := tracing.NewTraceLogger(logger)
 
-	logger.Info("initClickhouse start")
-
 	// Init clients
 	clickhousedb, err := initClickhouse()
 	if err != nil {
 		logger.Fatalf("init clickhouse db client failed: %v", err)
 	}
 
-	logger.Info("clickhouse inited")
-
-	// Init repositories
-	entryRepository := clickhouse.NewRepository(clickhousedb.Client(), traceLogger)
-
-	// Init use cases
-	entryList := usecases.NewListEntry(entryRepository, traceLogger)
-
-	// Init http handlers
 	var (
-		listEntryHandlers = handlers.NewEntryHandlers(entryList, traceLogger)
-		tracingMiddleware = handlers.NewTracingMiddleware(tracer)
+		// Init repositories
+		repository = clickhouse.NewRepository(clickhousedb.Client(), traceLogger)
+
+		// Init use cases
+		entryList   = usecases.NewListEntry(repository, traceLogger)
+		suggestList = usecases.NewListSuggest(repository, traceLogger)
+
+		// Init http handlers
+		listEntryHandlers   = handlers.NewEntryHandlers(entryList, traceLogger)
+		listSuggestHandlers = handlers.NewSuggestHandlers(suggestList, traceLogger)
+		tracingMiddleware   = handlers.NewTracingMiddleware(tracer)
 	)
 
 	// Init http server
@@ -74,6 +72,7 @@ func main() {
 	r1 := r.PathPrefix("/api/v1").Subrouter()
 	r1.Use(tracingMiddleware.Middleware)
 	r1.HandleFunc("/entry/list", listEntryHandlers.ListEntryHandler).Methods("POST")
+	r1.HandleFunc("/suggest/{type}", listSuggestHandlers.ListHandler).Methods("POST")
 
 	var errGroup errgroup.Group
 

@@ -70,6 +70,7 @@ Response:
             "namespace": "",
             "source": "",
             "host": "",
+            "level": "",
             "trace_id": "",
             "message": "",
             "params": {},

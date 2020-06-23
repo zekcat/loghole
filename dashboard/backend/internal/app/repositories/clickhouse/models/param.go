@@ -10,18 +10,24 @@ import (
 )
 
 const (
+	jsonFieldString = "params_string"
+	jsonFieldFloat  = "params_float"
+)
+
+const (
 	stringParams = "(has(params_string.keys, '%s') AND params_string.values[indexOf(params_string.keys, '%s')] %s ?)"
 	floatParams  = "(has(params_float.keys, '%s') AND params_float.values[indexOf(params_float.keys, '%s')] %s ?)"
 )
 
 type Param struct {
-	*domain.QueryParam
+	domain.QueryParam
 }
 
 func ParamFromDomain(param *domain.QueryParam) *Param {
-	return &Param{param}
+	return &Param{*param}
 }
 
+// nolint:golint,stylecheck,gocritic
 func (p *Param) ToSql() (query string, args []interface{}, err error) {
 	if p.IsTypeJSON() {
 		return p.prepareJSON()

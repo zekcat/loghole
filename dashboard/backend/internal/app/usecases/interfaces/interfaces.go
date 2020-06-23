@@ -18,5 +18,12 @@ type Logger interface {
 }
 
 type Storage interface {
+	// Entry methods
 	ListEntry(ctx context.Context, query *domain.Query) ([]*domain.Entry, error)
+
+	// Suggestion methods
+	ListNamespaceSuggest(ctx context.Context, value string) ([]string, error)
+	ListSourceSuggest(ctx context.Context, value string) ([]string, error)
+	ListHostSuggest(ctx context.Context, value string) ([]string, error)
+	ListLevelSuggest(ctx context.Context, value string) ([]string, error)
 }

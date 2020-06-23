@@ -11,6 +11,7 @@ type Entry struct {
 	Namespace   string          `json:"namespace"`
 	Source      string          `json:"source"`
 	Host        string          `json:"host"`
+	Level       string          `json:"level"`
 	TraceID     string          `json:"trace_id"`
 	Message     string          `json:"message"`
 	Params      json.RawMessage `json:"params"`

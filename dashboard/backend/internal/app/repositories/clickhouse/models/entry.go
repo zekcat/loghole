@@ -12,6 +12,7 @@ type Entry struct {
 	Namespace   string    `db:"namespace"`
 	Source      string    `db:"source"`
 	Host        string    `db:"host"`
+	Level       string    `db:"level"`
 	TraceID     string    `db:"trace_id"`
 	Message     string    `db:"message"`
 	Params      string    `db:"params"`
@@ -26,6 +27,7 @@ func (e *Entry) ToDomain() *domain.Entry {
 		Namespace:   e.Namespace,
 		Source:      e.Source,
 		Host:        e.Host,
+		Level:       e.Level,
 		TraceID:     e.TraceID,
 		Message:     e.Message,
 		BuildCommit: e.BuildCommit,
