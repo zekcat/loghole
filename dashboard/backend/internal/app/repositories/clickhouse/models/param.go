@@ -2,17 +2,14 @@ package models
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
 
 	"github.com/lissteron/loghole/dashboard/internal/app/domain"
 	"github.com/lissteron/loghole/dashboard/internal/app/repositories/clickhouse/tools"
-)
-
-const (
-	jsonFieldString = "params_string"
-	jsonFieldFloat  = "params_float"
 )
 
 const (
@@ -43,19 +40,19 @@ func (p *Param) ToSql() (query string, args []interface{}, err error) {
 	}
 
 	if p.Operator == domain.OperatorLike {
-		return p.prepareLikeParam()
+		return p.prepareParamLike()
 	}
 
 	if p.Operator == domain.OperatorNotLike {
-		return p.prepareNotLikeParam()
+		return p.prepareParamNotLike()
 	}
 
 	return strings.Join([]string{p.Key, p.Operator, "?"}, ""), append(args, p.Value.Item), nil
 }
 
-func (p *Param) prepareLikeParam() (query string, args []interface{}, err error) {
+func (p *Param) prepareParamLike() (query string, args []interface{}, err error) {
 	if len(p.Value.List) > 0 {
-		builder := make(squirrel.Or, 0, len(p.Value.List))
+		builder := make(squirrel.And, 0, len(p.Value.List))
 
 		for _, value := range p.Value.List {
 			builder = append(builder, squirrel.Like{p.Key: tools.CreateLike(value)})
@@ -67,9 +64,9 @@ func (p *Param) prepareLikeParam() (query string, args []interface{}, err error)
 	return squirrel.Like{p.Key: tools.CreateLike(p.Value.Item)}.ToSql()
 }
 
-func (p *Param) prepareNotLikeParam() (query string, args []interface{}, err error) {
+func (p *Param) prepareParamNotLike() (query string, args []interface{}, err error) {
 	if len(p.Value.List) > 0 {
-		builder := make(squirrel.Or, 0, len(p.Value.List))
+		builder := make(squirrel.And, 0, len(p.Value.List))
 
 		for _, value := range p.Value.List {
 			builder = append(builder, squirrel.NotLike{p.Key: tools.CreateLike(value)})
@@ -82,5 +79,25 @@ func (p *Param) prepareNotLikeParam() (query string, args []interface{}, err err
 }
 
 func (p *Param) prepareJSON() (query string, args []interface{}, err error) {
-	return "", nil, errors.New("unimplemented")
+	if p.Operator == ">" || p.Operator == "<" {
+		if len(p.Value.List) > 0 {
+			return "", nil, errors.New("json params unimplemented")
+		}
+
+		if value, ok := valueToFloat(p.Value.Item); ok {
+			return fmt.Sprintf(floatParams, p.Key, p.Key, p.Operator), append(args, value), nil
+		}
+	}
+
+	if len(p.Value.List) > 0 {
+		return "", nil, errors.New("json params unimplemented")
+	}
+
+	return fmt.Sprintf(stringParams, p.Key, p.Key, p.Operator), append(args, p.Value.Item), nil
+}
+
+func valueToFloat(val string) (float64, bool) {
+	f, err := strconv.ParseFloat(val, 64)
+
+	return f, err == nil
 }
