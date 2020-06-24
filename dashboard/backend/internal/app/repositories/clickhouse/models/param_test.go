@@ -19,106 +19,106 @@ func TestParam_ToSql(t *testing.T) {
 		expectedErr   string
 	}{
 		{
-			name:          "#1-1",
-			input:         &domain.QueryParam{
+			name: "#1-1",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{Item: "value"},
 				Operator: "=",
 			},
 			expectedQuery: "key=?",
-			expectedArgs:  []interface {}{"value"},
+			expectedArgs:  []interface{}{"value"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name:          "#1-2",
-			input:         &domain.QueryParam{
+			name: "#1-2",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{Item: "value"},
 				Operator: "!=",
 			},
 			expectedQuery: "key!=?",
-			expectedArgs:  []interface {}{"value"},
+			expectedArgs:  []interface{}{"value"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name:          "#2-1",
-			input:         &domain.QueryParam{
+			name: "#2-1",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{Item: "value"},
 				Operator: "LIKE",
 			},
 			expectedQuery: "key LIKE ?",
-			expectedArgs:  []interface {}{"%value%"},
+			expectedArgs:  []interface{}{"%value%"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name:          "#2-2",
-			input:         &domain.QueryParam{
+			name: "#2-2",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{Item: "value"},
 				Operator: "NOT LIKE",
 			},
 			expectedQuery: "key NOT LIKE ?",
-			expectedArgs:  []interface {}{"%value%"},
+			expectedArgs:  []interface{}{"%value%"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name:          "#3-1",
-			input:         &domain.QueryParam{
+			name: "#3-1",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
 				Operator: "LIKE",
 			},
 			expectedQuery: "(key LIKE ? AND key LIKE ? AND key LIKE ?)",
-			expectedArgs:  []interface {}{"%value1%", "%value2%", "%value3%"},
+			expectedArgs:  []interface{}{"%value1%", "%value2%", "%value3%"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name:          "#3-2",
-			input:         &domain.QueryParam{
+			name: "#3-2",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
 				Operator: "NOT LIKE",
 			},
 			expectedQuery: "(key NOT LIKE ? AND key NOT LIKE ? AND key NOT LIKE ?)",
-			expectedArgs:  []interface {}{"%value1%", "%value2%", "%value3%"},
+			expectedArgs:  []interface{}{"%value1%", "%value2%", "%value3%"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name:          "#4-1",
-			input:         &domain.QueryParam{
+			name: "#4-1",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
 				Operator: "IN",
 			},
 			expectedQuery: "key IN (?,?,?)",
-			expectedArgs:  []interface {}{"value1", "value2", "value3"},
+			expectedArgs:  []interface{}{"value1", "value2", "value3"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name:          "#4-2",
-			input:         &domain.QueryParam{
+			name: "#4-2",
+			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
 				Operator: "NOT IN",
 			},
 			expectedQuery: "key NOT IN (?,?,?)",
-			expectedArgs:  []interface {}{"value1", "value2", "value3"},
+			expectedArgs:  []interface{}{"value1", "value2", "value3"},
 			wantErr:       false,
 			expectedErr:   "",
 		},

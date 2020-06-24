@@ -6,8 +6,6 @@ const (
 )
 
 const (
-	OperatorIn      = "IN"
-	OperatorNotIn   = "NOT IN"
 	OperatorLike    = "LIKE"
 	OperatorNotLike = "NOT LIKE"
 )
@@ -25,8 +23,45 @@ type QueryParam struct {
 	Operator string
 }
 
+func (p *QueryParam) IsOperator(operator string) bool {
+	return p.Operator == operator
+}
+
+func (p *QueryParam) IsList() bool {
+	return len(p.Value.List) != 0
+}
+
+func (p *QueryParam) IsLike() bool {
+	return (OperatorLike == p.Operator || OperatorNotLike == p.Operator)
+}
+
+func (p *QueryParam) IsLtGt() bool {
+	switch p.Operator {
+	case ">", ">=", "<", "<=":
+		return true
+	}
+
+	return false
+}
+
+func (p *QueryParam) IsIn() bool {
+	return p.Operator == "=" && len(p.Value.List) > 0
+}
+
+func (p *QueryParam) IsNotIn() bool {
+	return p.Operator == "!=" && len(p.Value.List) > 0
+}
+
 func (p *QueryParam) IsTypeJSON() bool {
 	return p.Type == TypeKey
+}
+
+func (p *QueryParam) GetValueList() []string {
+	return p.Value.List
+}
+
+func (p *QueryParam) GetValueItem() string {
+	return p.Value.Item
 }
 
 type ParamValue struct {
