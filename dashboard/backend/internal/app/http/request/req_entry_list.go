@@ -112,7 +112,7 @@ func (p *ListEntryParam) valueRules() []validation.Rule {
 func (p *ListEntryParam) operatorRules() []validation.Rule {
 	return []validation.Rule{
 		validation.Required.ErrorCode(codes.ValidQueryParamsOperatorRequired.String()),
-		validation.In("<", "<=", ">=", "<>", ">", "!=", "=", "LIKE", "NOT LIKE").
+		validation.In("<", "<=", ">=", "<>", ">", "!=", "=", "LIKE", "NOT LIKE", "IN", "NOT IN").
 			ErrorCode(codes.ValidQueryParamsOperatorIn.String()),
 	}
 }
