@@ -74,16 +74,19 @@ func main() {
 	r1.HandleFunc("/entry/list", listEntryHandlers.ListEntryHandler).Methods("POST")
 	r1.HandleFunc("/suggest/{type}", listSuggestHandlers.ListHandler).Methods("POST")
 
-	var errGroup errgroup.Group
+	var errGroup, ctx = errgroup.WithContext(context.Background())
 
 	errGroup.Go(func() error {
 		logger.Infof("start http server on: %s", srv.Addr())
 		return srv.ListenAndServe()
 	})
 
-	<-exit
-
-	logger.Info("stopping application")
+	select {
+	case <-exit:
+		logger.Info("stopping application")
+	case <-ctx.Done():
+		logger.Error("stopping application with error")
+	}
 
 	if err = srv.Shutdown(context.Background()); err != nil {
 		logger.Errorf("error while stopping web server: %v", err)
