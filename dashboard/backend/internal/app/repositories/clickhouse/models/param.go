@@ -91,21 +91,21 @@ func valueToFloat(val string) (float64, bool) {
 
 func getOperator(operator string) string {
 	switch operator {
-	case "<":
-		return "<"
-	case ">":
-		return ">"
-	case "<=":
-		return "<="
-	case ">=":
-		return ">="
-	case "!=":
-		return "!="
-	case "IN":
-		return "IN"
-	case "NOT IN":
-		return "NOT IN"
+	case domain.OperatorLt:
+		return domain.OperatorLt
+	case domain.OperatorLtEq:
+		return domain.OperatorLtEq
+	case domain.OperatorGt:
+		return domain.OperatorGt
+	case domain.OperatorGtEq:
+		return domain.OperatorGtEq
+	case domain.OperatorNotEq:
+		return domain.OperatorNotEq
+	case domain.OperatorLike:
+		return domain.OperatorLike
+	case domain.OperatorNotLike:
+		return domain.OperatorNotLike
 	default:
-		return "="
+		return domain.OperatorEq
 	}
 }

@@ -112,8 +112,15 @@ func (p *ListEntryParam) valueRules() []validation.Rule {
 func (p *ListEntryParam) operatorRules() []validation.Rule {
 	return []validation.Rule{
 		validation.Required.ErrorCode(codes.ValidQueryParamsOperatorRequired.String()),
-		validation.In("<", "<=", ">=", ">", "!=", "=", "LIKE", "NOT LIKE").
-			ErrorCode(codes.ValidQueryParamsOperatorIn.String()),
+		validation.In(
+			domain.OperatorLt,
+			domain.OperatorLtEq,
+			domain.OperatorGt,
+			domain.OperatorGtEq,
+			domain.OperatorEq,
+			domain.OperatorNotEq,
+			domain.OperatorLike,
+			domain.OperatorNotLike).ErrorCode(codes.ValidQueryParamsOperatorIn.String()),
 	}
 }
 

@@ -6,6 +6,14 @@ const (
 )
 
 const (
+	OperatorLt      = "<"
+	OperatorLtEq    = "<="
+	OperatorGt      = ">"
+	OperatorGtEq    = ">="
+	OperatorEq      = "="
+	OperatorNotEq   = "!="
+	OperatorIn      = "IN"
+	OperatorNotIn   = "NOT IN"
 	OperatorLike    = "LIKE"
 	OperatorNotLike = "NOT LIKE"
 )

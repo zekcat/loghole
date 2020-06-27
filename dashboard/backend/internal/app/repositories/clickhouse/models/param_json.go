@@ -37,7 +37,7 @@ func (p *JSONParam) getIn() (query string, args []interface{}, err error) {
 
 	param := strings.Join([]string{"(", strings.Join(builder, ","), ")"}, "")
 
-	return fmt.Sprintf(stringParams, "IN", param), args, nil
+	return fmt.Sprintf(stringParams, domain.OperatorIn, param), args, nil
 }
 
 func (p *JSONParam) getNotIn() (query string, args []interface{}, err error) {
@@ -51,7 +51,7 @@ func (p *JSONParam) getNotIn() (query string, args []interface{}, err error) {
 
 	param := strings.Join([]string{"(", strings.Join(builder, ","), ")"}, "")
 
-	return fmt.Sprintf(stringParams, "NOT IN", param), args, nil
+	return fmt.Sprintf(stringParams, domain.OperatorNotIn, param), args, nil
 }
 
 func (p *JSONParam) getLike() (query string, args []interface{}, err error) {
