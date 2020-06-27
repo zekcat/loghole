@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/lissteron/loghole/dashboard/internal/app/domain"
@@ -54,7 +55,7 @@ func prepareParamListLike(p ParamInt) (query string, args []interface{}, err err
 		case p.IsOperator(domain.OperatorLike):
 			q, a, err = p.getLikeWithValue(value)
 		case p.IsOperator(domain.OperatorNotLike):
-			q, a, err = p.getLikeWithValue(value)
+			q, a, err = p.getNotLikeWithValue(value)
 		default:
 			panic(ErrNotImplemented)
 		}
@@ -80,4 +81,31 @@ func prepareParamLtGt(p ParamInt) (query string, args []interface{}, err error) 
 	}
 
 	return p.getLtGtString()
+}
+
+func valueToFloat(val string) (float64, bool) {
+	f, err := strconv.ParseFloat(val, 64)
+
+	return f, err == nil
+}
+
+func getOperator(operator string) string {
+	switch operator {
+	case "<":
+		return "<"
+	case ">":
+		return ">"
+	case "<=":
+		return "<="
+	case ">=":
+		return ">="
+	case "!=":
+		return "!="
+	case "IN":
+		return "IN"
+	case "NOT IN":
+		return "NOT IN"
+	default:
+		return "="
+	}
 }

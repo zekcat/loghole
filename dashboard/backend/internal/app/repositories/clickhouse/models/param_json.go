@@ -2,14 +2,15 @@ package models
 
 import (
 	"fmt"
-	"strconv"
+	"strings"
 
 	"github.com/lissteron/loghole/dashboard/internal/app/domain"
+	"github.com/lissteron/loghole/dashboard/internal/app/repositories/clickhouse/tools"
 )
 
 const (
-	stringParams = "(has(params_string.keys, ?) AND params_string.values[indexOf(params_string.keys, ?)] %s ?)"
-	floatParams  = "(has(params_float.keys, ?) AND params_float.values[indexOf(params_float.keys, ?)] %s ?)"
+	stringParams = "(has(params_string.keys, ?) AND params_string.values[indexOf(params_string.keys, ?)] %s %s)"
+	floatParams  = "(has(params_float.keys, ?) AND params_float.values[indexOf(params_float.keys, ?)] %s %s)"
 )
 
 type JSONParam struct {
@@ -20,80 +21,75 @@ func JSONParamFromDomain(param *domain.QueryParam) *JSONParam {
 	return &JSONParam{*param}
 }
 
+// nolint:golint,stylecheck,gocritic
+func (p *JSONParam) ToSql() (query string, args []interface{}, err error) {
+	return buildSQL(p)
+}
+
 func (p *JSONParam) getIn() (query string, args []interface{}, err error) {
-	return "", nil, ErrNotImplemented
+	builder := make([]string, 0, len(p.Value.List))
+	args = append(args, p.Key, p.Key)
+
+	for _, value := range p.GetValueList() {
+		builder = append(builder, "?")
+		args = append(args, value)
+	}
+
+	param := strings.Join([]string{"(", strings.Join(builder, ","), ")"}, "")
+
+	return fmt.Sprintf(stringParams, "IN", param), args, nil
 }
 
 func (p *JSONParam) getNotIn() (query string, args []interface{}, err error) {
-	return "", nil, ErrNotImplemented
+	builder := make([]string, 0, len(p.Value.List))
+	args = append(args, p.Key, p.Key)
+
+	for _, value := range p.GetValueList() {
+		builder = append(builder, "?")
+		args = append(args, value)
+	}
+
+	param := strings.Join([]string{"(", strings.Join(builder, ","), ")"}, "")
+
+	return fmt.Sprintf(stringParams, "NOT IN", param), args, nil
 }
 
 func (p *JSONParam) getLike() (query string, args []interface{}, err error) {
-	return "", nil, ErrNotImplemented
+	query = fmt.Sprintf(stringParams, "LIKE", "?")
+	args = []interface{}{p.Key, p.Key, tools.CreateLike(p.GetValueItem())}
+
+	return query, args, nil
 }
 
 func (p *JSONParam) getNotLike() (query string, args []interface{}, err error) {
-	return "", nil, ErrNotImplemented
+	query = fmt.Sprintf(stringParams, "NOT LIKE", "?")
+	args = []interface{}{p.Key, p.Key, tools.CreateLike(p.GetValueItem())}
+
+	return query, args, nil
 }
 
 func (p *JSONParam) getLikeWithValue(val string) (query string, args []interface{}, err error) {
-	return "", nil, ErrNotImplemented
+	query = fmt.Sprintf(stringParams, "LIKE", "?")
+	args = []interface{}{p.Key, p.Key, tools.CreateLike(val)}
+
+	return query, args, nil
 }
 
 func (p *JSONParam) getNotLikeWithValue(val string) (query string, args []interface{}, err error) {
-	return "", nil, ErrNotImplemented
+	query = fmt.Sprintf(stringParams, "NOT LIKE", "?")
+	args = []interface{}{p.Key, p.Key, tools.CreateLike(val)}
+
+	return query, args, nil
 }
 
 func (p *JSONParam) getLtGtString() (query string, args []interface{}, err error) {
-	return fmt.Sprintf(stringParams, p.Operator), []interface{}{p.Key, p.Key, p.Value.Item}, nil
+	return fmt.Sprintf(stringParams, getOperator(p.Operator), "?"), []interface{}{p.Key, p.Key, p.Value.Item}, nil
 }
 
 func (p *JSONParam) getLtGtFloat(val float64) (query string, args []interface{}, err error) {
-	return fmt.Sprintf(floatParams, p.Operator), []interface{}{p.Key, p.Key, val}, nil
+	return fmt.Sprintf(floatParams, getOperator(p.Operator), "?"), []interface{}{p.Key, p.Key, val}, nil
 }
 
 func (p *JSONParam) getDefault() (query string, args []interface{}, err error) {
-	return fmt.Sprintf(stringParams, p.Operator), []interface{}{p.Key, p.Key, p.Value.Item}, nil
+	return fmt.Sprintf(stringParams, getOperator(p.Operator), "?"), []interface{}{p.Key, p.Key, p.Value.Item}, nil
 }
-
-func valueToFloat(val string) (float64, bool) {
-	f, err := strconv.ParseFloat(val, 64)
-
-	return f, err == nil
-}
-
-/*
-func (p *Param) prepareJSON() (query string, args []interface{}, err error) {
-	if len(p.Value.List) > 0 {
-		return p.prepareArrayJSON()
-	}
-
-	switch p.Operator {
-	case ">", "<", ">=", "<=":
-		if value, ok := valueToFloat(p.Value.Item); ok {
-			return fmt.Sprintf(floatParams, p.Operator), []interface{}{p.Key, p.Key, value}, nil
-		}
-
-		return
-	}
-
-	return fmt.Sprintf(stringParams, p.Operator), []interface{}{p.Key, p.Key, p.Value.Item}, nil
-}
-
-func (p *Param) prepareArrayJSON() (query string, args []interface{}, err error) {
-	switch p.Operator {
-	case ">", "<":
-		builder := make([]string, 0, len(p.Value.List))
-
-		for _, listValue := range p.Value.List {
-			value, ok := valueToFloat(listValue)
-			if !ok {
-				return "", nil, errors.New()
-			}
-
-			builder = append(builder, fmt.Sprintf(floatParams, p.Operator)),
-				args = append(args, p.Key, p.Key, value)
-		}
-	}
-}
-*/

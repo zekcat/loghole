@@ -19,8 +19,6 @@ func (r *Repository) ListEntry(ctx context.Context, input *domain.Query) ([]*dom
 		return nil, err
 	}
 
-	r.logger.Debug(ctx, "query:", query) // TODO: REMOVE
-
 	var dest []*models.Entry
 
 	if err := r.db.SelectContext(ctx, &dest, query, args...); err != nil {
@@ -46,7 +44,12 @@ func buildListEntryQuery(
 		"trace_id", "message", "params", "build_commit", "config_hash").From("internal_logs_buffer")
 
 	for _, param := range input.Params {
-		builder = builder.Where(models.ParamFromDomain(param))
+		if param.IsTypeJSON() {
+			builder = builder.Where(models.JSONParamFromDomain(param))
+			continue
+		}
+
+		builder = builder.Where(models.ColumnParamFromDomain(param))
 	}
 
 	return builder.OrderBy("time DESC").

@@ -32,7 +32,7 @@ func (p *QueryParam) IsList() bool {
 }
 
 func (p *QueryParam) IsLike() bool {
-	return (OperatorLike == p.Operator || OperatorNotLike == p.Operator)
+	return OperatorLike == p.Operator || OperatorNotLike == p.Operator
 }
 
 func (p *QueryParam) IsLtGt() bool {

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +18,7 @@ func TestParam_ToSql(t *testing.T) {
 		expectedErr   string
 	}{
 		{
-			name: "#1-1",
+			name: "column1",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
@@ -32,7 +31,7 @@ func TestParam_ToSql(t *testing.T) {
 			expectedErr:   "",
 		},
 		{
-			name: "#1-2",
+			name: "column2",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
@@ -45,7 +44,7 @@ func TestParam_ToSql(t *testing.T) {
 			expectedErr:   "",
 		},
 		{
-			name: "#2-1",
+			name: "column3",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
@@ -58,7 +57,7 @@ func TestParam_ToSql(t *testing.T) {
 			expectedErr:   "",
 		},
 		{
-			name: "#2-2",
+			name: "column4",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
@@ -71,38 +70,38 @@ func TestParam_ToSql(t *testing.T) {
 			expectedErr:   "",
 		},
 		{
-			name: "#3-1",
+			name: "column5",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
 				Operator: "LIKE",
 			},
-			expectedQuery: "(key LIKE ? AND key LIKE ? AND key LIKE ?)",
+			expectedQuery: "key LIKE ? AND key LIKE ? AND key LIKE ?",
 			expectedArgs:  []interface{}{"%value1%", "%value2%", "%value3%"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name: "#3-2",
+			name: "column6",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
 				Operator: "NOT LIKE",
 			},
-			expectedQuery: "(key NOT LIKE ? AND key NOT LIKE ? AND key NOT LIKE ?)",
+			expectedQuery: "key NOT LIKE ? AND key NOT LIKE ? AND key NOT LIKE ?",
 			expectedArgs:  []interface{}{"%value1%", "%value2%", "%value3%"},
 			wantErr:       false,
 			expectedErr:   "",
 		},
 		{
-			name: "#4-1",
+			name: "column7",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
-				Operator: "IN",
+				Operator: "=",
 			},
 			expectedQuery: "key IN (?,?,?)",
 			expectedArgs:  []interface{}{"value1", "value2", "value3"},
@@ -110,12 +109,12 @@ func TestParam_ToSql(t *testing.T) {
 			expectedErr:   "",
 		},
 		{
-			name: "#4-2",
+			name: "column8",
 			input: &domain.QueryParam{
 				Type:     "column",
 				Key:      "key",
 				Value:    domain.ParamValue{List: []string{"value1", "value2", "value3"}},
-				Operator: "NOT IN",
+				Operator: "!=",
 			},
 			expectedQuery: "key NOT IN (?,?,?)",
 			expectedArgs:  []interface{}{"value1", "value2", "value3"},
@@ -125,13 +124,10 @@ func TestParam_ToSql(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			query, args, err := ParamFromDomain(tt.input).ToSql()
+			query, args, err := ColumnParamFromDomain(tt.input).ToSql()
 			if (err != nil) != tt.wantErr {
 				t.Error(err)
 			}
-
-			log.Println(query)
-			log.Println(args)
 
 			assert.Equal(t, tt.expectedQuery, query)
 			assert.Equal(t, tt.expectedArgs, args)
