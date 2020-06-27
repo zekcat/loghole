@@ -7,9 +7,9 @@ const (
 
 const (
 	OperatorLt      = "<"
-	OperatorLtEq    = "<="
+	OperatorLte     = "<="
 	OperatorGt      = ">"
-	OperatorGtEq    = ">="
+	OperatorGte     = ">="
 	OperatorEq      = "="
 	OperatorNotEq   = "!="
 	OperatorIn      = "IN"

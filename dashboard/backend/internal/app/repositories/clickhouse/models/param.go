@@ -93,12 +93,12 @@ func getOperator(operator string) string {
 	switch operator {
 	case domain.OperatorLt:
 		return domain.OperatorLt
-	case domain.OperatorLtEq:
-		return domain.OperatorLtEq
+	case domain.OperatorLte:
+		return domain.OperatorLte
 	case domain.OperatorGt:
 		return domain.OperatorGt
-	case domain.OperatorGtEq:
-		return domain.OperatorGtEq
+	case domain.OperatorGte:
+		return domain.OperatorGte
 	case domain.OperatorNotEq:
 		return domain.OperatorNotEq
 	case domain.OperatorLike:

@@ -6,4 +6,7 @@ import (
 
 func Init() {
 	viper.AutomaticEnv()
+
+	viper.SetDefault("CLICKHOUSE_READ_TIMEOUT", 10)
+	viper.SetDefault("CLICKHOUSE_WRITE_TIMEOUT", 20)
 }

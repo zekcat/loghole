@@ -114,9 +114,9 @@ func (p *ListEntryParam) operatorRules() []validation.Rule {
 		validation.Required.ErrorCode(codes.ValidQueryParamsOperatorRequired.String()),
 		validation.In(
 			domain.OperatorLt,
-			domain.OperatorLtEq,
+			domain.OperatorLte,
 			domain.OperatorGt,
-			domain.OperatorGtEq,
+			domain.OperatorGte,
 			domain.OperatorEq,
 			domain.OperatorNotEq,
 			domain.OperatorLike,

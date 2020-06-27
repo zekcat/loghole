@@ -48,19 +48,6 @@ func (b *builder) init() {
 	}
 }
 
-func AddFile(filepath string) Option {
-	return func(s *builder) (err error) {
-		writer, err := NewWriter(filepath)
-		if err != nil {
-			return
-		}
-
-		s.writers = append(s.writers, writer)
-
-		return
-	}
-}
-
 func AddCaller() Option {
 	return func(s *builder) (err error) {
 		s.options = append(s.options, zap.AddCaller())

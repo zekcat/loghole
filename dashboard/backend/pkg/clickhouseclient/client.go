@@ -8,14 +8,22 @@ import (
 	_ "github.com/ClickHouse/clickhouse-go" // driver
 )
 
-const connStr = "tcp://%s?username=%s&database=%s&read_timeout=10&write_timeout=20"
+const connStr = "tcp://%s?username=%s&database=%s&read_timeout=%d&write_timeout=%d"
+
+type Options struct {
+	Addr         string
+	User         string
+	Database     string
+	ReadTimeout  int
+	WriteTimeout int
+}
 
 type Client struct {
 	db *sqlx.DB
 }
 
-func NewClient(addr, user, database string) (*Client, error) {
-	db, err := sqlx.Connect("clickhouse", fmt.Sprintf(connStr, addr, user, database))
+func NewClient(options *Options) (*Client, error) {
+	db, err := sqlx.Connect("clickhouse", connString(options))
 	if err != nil {
 		return nil, err
 	}
@@ -29,4 +37,8 @@ func (c *Client) Client() *sqlx.DB {
 
 func (c *Client) Close() error {
 	return c.db.Close()
+}
+
+func connString(options *Options) string {
+	return fmt.Sprintf(connStr, options.Addr, options.User, options.Database, options.ReadTimeout, options.WriteTimeout)
 }

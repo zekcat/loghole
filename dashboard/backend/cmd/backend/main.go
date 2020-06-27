@@ -120,11 +120,13 @@ func initTracer() (*tracing.Tracer, error) {
 }
 
 func initClickhouse() (*clickhouseclient.Client, error) {
-	return clickhouseclient.NewClient(
-		viper.GetString("CLICKHOUSE_URI"),
-		viper.GetString("CLICKHOUSE_USER"),
-		viper.GetString("CLICKHOUSE_DATABASE"),
-	)
+	return clickhouseclient.NewClient(&clickhouseclient.Options{
+		Addr:         viper.GetString("CLICKHOUSE_URI"),
+		User:         viper.GetString("CLICKHOUSE_USER"),
+		Database:     viper.GetString("CLICKHOUSE_DATABASE"),
+		ReadTimeout:  viper.GetInt("CLICKHOUSE_READ_TIMEOUT"),
+		WriteTimeout: viper.GetInt("CLICKHOUSE_WRITE_TIMEOUT"),
+	})
 }
 
 func initHTTPServer() *server.HTTP {
