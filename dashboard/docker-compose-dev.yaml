@@ -1,0 +1,49 @@
+version: '3'
+services:
+  clickhouse:
+    image: yandex/clickhouse-server
+    ports:
+      - 127.0.0.1:8123:8123
+      - 127.0.0.1:9500:9000
+      - 127.0.0.1:9009:9009
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.8
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+
+  backend:
+    image: golang:1.14-alpine
+    volumes:
+      - ./dashboard/backend/:/app
+    working_dir: /app/cmd/backend/
+    command: go run main.go
+    environment:
+      - SERVICE_HTTP_PORT=8080
+      - LOGGER_LEVEL=debug
+
+      - CLICKHOUSE_URI=clickhouse:9000
+      - CLICKHOUSE_USER=
+      - CLICKHOUSE_DATABASE=logs
+
+      - JAEGER_URI=jaeger:6831
+    ports:
+      - 18081:8080
+    depends_on:
+      - clickhouse
+      - jaeger
+
+  web:
+    image: node:12.16-alpine
+    volumes:
+      - ./dashboard/frontend/:/app
+    working_dir: /app/
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "apk update && apk add --no-cache ca-certificates && cd /app && yarn install && yarn serve",
+      ]
+    ports:
+      - "0.0.0.0:8080:8080"
