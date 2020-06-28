@@ -47,7 +47,7 @@ func (r *ListEntryRequest) ToInput() *usecases.ListEntryIn {
 		Offset: r.Offset,
 	}
 
-	for _, val := range query.Params {
+	for _, val := range r.Params {
 		query.Params = append(query.Params, &domain.QueryParam{
 			Type:     val.Type,
 			Key:      val.Key,

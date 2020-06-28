@@ -19,6 +19,8 @@ func (r *Repository) ListEntry(ctx context.Context, input *domain.Query) ([]*dom
 		return nil, err
 	}
 
+	r.logger.Debugf(ctx, "query = %s", query)
+
 	var dest []*models.Entry
 
 	if err := r.db.SelectContext(ctx, &dest, query, args...); err != nil {
