@@ -432,14 +432,6 @@ export default Vue.extend({
           console.error(e);
         });
     },
-    /* formatDate(inDate Date): string {
-      let month = inDate.getMonth()+1
-      if(month < 10) {
-
-      }
-
-      return ``
-    } */
   },
 });
 </script>
