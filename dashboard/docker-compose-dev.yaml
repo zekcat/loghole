@@ -16,7 +16,7 @@ services:
   backend:
     image: golang:1.14-alpine
     volumes:
-      - ./dashboard/backend/:/app
+      - ./backend/:/app
     working_dir: /app/cmd/backend/
     command: go run main.go
     environment:
@@ -37,7 +37,7 @@ services:
   web:
     image: node:12.16-alpine
     volumes:
-      - ./dashboard/frontend/:/app
+      - ./frontend/:/app
     working_dir: /app/
     command:
       [
