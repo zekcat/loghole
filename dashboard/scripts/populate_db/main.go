@@ -75,6 +75,8 @@ func main() {
 			log.Println("Commit", err)
 			continue
 		}
+
+		time.Sleep(time.Millisecond * 3)
 	}
 
 	log.Println("success")
