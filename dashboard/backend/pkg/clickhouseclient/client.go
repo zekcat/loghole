@@ -21,6 +21,7 @@ type Options struct {
 	Database     string
 	ReadTimeout  int
 	WriteTimeout int
+	SchemaPath   string
 }
 
 type Client struct {
@@ -61,7 +62,7 @@ func isDBNotFound(err error) bool {
 }
 
 func initDB(options *Options) error {
-	f, err := os.Open("/db/init.sql")
+	f, err := os.Open(options.SchemaPath)
 	if err != nil {
 		return err
 	}

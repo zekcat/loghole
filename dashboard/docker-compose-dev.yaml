@@ -29,6 +29,7 @@ services:
       - CLICKHOUSE_URI=clickhouse:9000
       - CLICKHOUSE_USER=
       - CLICKHOUSE_DATABASE=logs
+      - CLICKHOUSE_SCHEMA_PATH=/db/init.sql
 
       - JAEGER_URI=jaeger:6831
     ports:

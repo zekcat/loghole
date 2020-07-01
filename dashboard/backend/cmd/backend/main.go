@@ -129,6 +129,7 @@ func initClickhouse() (*clickhouseclient.Client, error) {
 		Database:     viper.GetString("CLICKHOUSE_DATABASE"),
 		ReadTimeout:  viper.GetInt("CLICKHOUSE_READ_TIMEOUT"),
 		WriteTimeout: viper.GetInt("CLICKHOUSE_WRITE_TIMEOUT"),
+		SchemaPath:   viper.GetString("CLICKHOUSE_SCHEMA_PATH"),
 	})
 }
 
