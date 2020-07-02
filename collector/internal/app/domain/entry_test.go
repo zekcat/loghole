@@ -38,7 +38,8 @@ var data = []byte(`
             11,
             11,
             11,
-            "WWW"
+            "WWW",
+			{"someKey": "someValue"}
          ]
       }
    }
@@ -60,7 +61,7 @@ func TestEntry_UnmarshalJSON(t *testing.T) {
 	log.Println(entry.Message)
 	log.Println(entry.BuildCommit)
 	log.Println(entry.ConfigHash)
-	log.Println(entry.Params)
+	log.Println(string(entry.Params))
 	log.Println(entry.StringKey)
 	log.Println(entry.StringVal)
 	log.Println(entry.FloatKey)

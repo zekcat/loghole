@@ -2,7 +2,7 @@ package domain
 
 import (
 	"encoding/json"
-	"log"
+	"strconv"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -28,13 +28,13 @@ type Entry struct {
 func (e *Entry) UnmarshalJSON(data []byte) (err error) {
 	*e = Entry{Params: data}
 
-	return jsonparser.ObjectEach(data, e.parseRoot)
+	return jsonparser.ObjectEach(data, e.parseRootObject)
 }
 
-func (e *Entry) parseRoot(key []byte, value []byte, dataType jsonparser.ValueType, offset int) (err error) {
+func (e *Entry) parseRootObject(key []byte, value []byte, dataType jsonparser.ValueType, offset int) (err error) {
 	switch string(key) {
 	case "time":
-		e.Time, err = parseTime(value)
+		e.Time, err = e.parseTime(value)
 	case "namespace":
 		e.Namespace = string(value)
 	case "source":
@@ -52,43 +52,59 @@ func (e *Entry) parseRoot(key []byte, value []byte, dataType jsonparser.ValueTyp
 	case "config_hash":
 		e.ConfigHash = string(value)
 	default:
-		return e.parseOther(key, value, dataType, offset)
-	}
-
-	return nil
-}
-
-func (e *Entry) parseOther(key []byte, value []byte, dataType jsonparser.ValueType, offset int) (err error) {
-	switch dataType {
-	case jsonparser.Array:
-		_, err = jsonparser.ArrayEach(value, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			if err != nil {
-				return
-			}
-
-			if err = e.parseOther(key, value, dataType, offset); err != nil {
-				log.Println(err)
-			}
-		})
-	case jsonparser.String:
-		e.StringKey = append(e.StringKey, string(key))
-		e.StringVal = append(e.StringVal, string(value))
-	case jsonparser.Number:
-		f, err := jsonparser.ParseFloat(value)
-		if err != nil {
-			return err
-		}
-
-		e.FloatKey = append(e.FloatKey, string(key))
-		e.FloatVal = append(e.FloatVal, f)
-	case jsonparser.Object:
-		return jsonparser.ObjectEach(value, e.parseOther)
+		return e.parseOtherObject(key, value, dataType, offset)
 	}
 
 	return err
 }
 
-func parseTime(data []byte) (time.Time, error) {
+func (e *Entry) parseOtherObject(key []byte, value []byte, dataType jsonparser.ValueType, _ int) (err error) {
+	switch dataType {
+	case jsonparser.Array:
+		return e.parseArray(key, value)
+	case jsonparser.Number:
+		return e.appendFloat(key, value)
+	case jsonparser.Object:
+		return jsonparser.ObjectEach(value, e.parseOtherObject)
+	}
+
+	e.appendString(key, value)
+
+	return nil
+}
+
+func (e *Entry) parseArray(key, value []byte) (err error) {
+	_, err = jsonparser.ArrayEach(value, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		if err != nil {
+			return
+		}
+
+		if err = e.parseOtherObject(key, value, dataType, offset); err != nil {
+			panic(err)
+		}
+	})
+
+	return err
+}
+
+func (e *Entry) appendFloat(key, value []byte) error {
+	f, err := strconv.ParseFloat(string(value), 64)
+	if err != nil {
+		return err
+	}
+
+	e.FloatKey = append(e.FloatKey, string(key))
+	e.FloatVal = append(e.FloatVal, f)
+
+	return nil
+}
+
+func (e *Entry) appendString(key, value []byte) {
+	e.StringKey = append(e.StringKey, string(key))
+	e.StringVal = append(e.StringVal, string(value))
+}
+
+func (e *Entry) parseTime(data []byte) (time.Time, error) {
 	nsec, err := jsonparser.ParseInt(data)
 	if err != nil {
 		return time.Time{}, err
