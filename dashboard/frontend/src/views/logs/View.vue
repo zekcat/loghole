@@ -1,4 +1,5 @@
 <template>
+
   <div class="columns p-2 pt-4">
     <!-- add param -->
     <b-sidebar
@@ -34,14 +35,15 @@
           label-position="on-border"
           v-if="isListValue(param.operator)"
         >
-          <b-taginput
+          <compos :vmodstring="param.value.list" phtext="Value"></compos>
+          <!-- <b-taginput
             v-model="param.value.list"
             autocomplete
             :allow-new="true"
             placeholder="Value"
             icon="label"
-          >
-          </b-taginput>
+          > -->
+          <!-- </b-taginput> -->
         </b-field>
         <b-field label="Value" label-position="on-border" v-else>
           <input
@@ -51,7 +53,6 @@
             placeholder="Value"
           />
         </b-field>
-
         <button
           class="button is-small is-fullwidth is-outlined is-success"
           @click="saveParam()"
@@ -61,7 +62,6 @@
       </div>
     </b-sidebar>
     <!-- add param -->
-
     <div class="column page-menu">
       <!-- date -->
       <b-field label="Start time" label-position="on-border">
@@ -86,7 +86,8 @@
 
       <!-- level -->
       <b-field label="Level =" label-position="on-border">
-        <b-taginput
+        <compos :vmodstring="form.level" :datar="levels" phtext="Level"></compos>
+        <!-- <b-taginput
           v-model="form.level"
           :data="levels"
           autocomplete
@@ -95,14 +96,15 @@
           placeholder="Level"
           @typing="getLevelList"
           icon="label"
-        >
-        </b-taginput>
+        > -->
+        <!-- </b-taginput> -->
       </b-field>
       <!-- // level -->
 
       <!-- namespace -->
       <b-field label="Namespace =" label-position="on-border">
-        <b-taginput
+        <compos :vmodstring="form.namespace" :datar="namespaces" phtext="Namespace"></compos>
+        <!-- <b-taginput
           v-model="form.namespace"
           :data="namespaces"
           autocomplete
@@ -111,14 +113,15 @@
           placeholder="Namespace"
           @typing="getNamespaceList"
           icon="label"
-        >
-        </b-taginput>
+        > -->
+        <!-- </b-taginput> -->
       </b-field>
       <!-- // namespace -->
 
       <!-- source -->
       <b-field label="Source" label-position="on-border">
-        <b-taginput
+         <compos :vmodstring="form.source" :datar="sources" phtext="Source"></compos>
+        <!-- <b-taginput
           v-model="form.source"
           :data="sources"
           autocomplete
@@ -127,21 +130,21 @@
           placeholder="Source"
           @typing="getSourceList"
           icon="label"
-        >
-        </b-taginput>
+        > -->
+        <!-- </b-taginput> -->
       </b-field>
       <!-- // source -->
-
       <!-- traceID -->
       <b-field label="Trace ID" label-position="on-border">
-        <b-taginput
+         <compos :vmodstring="form.traceID" phtext="Trace ID"></compos>
+        <!-- <b-taginput
           v-model="form.traceID"
           autocomplete
           :allow-new="true"
           placeholder="Trace ID"
           icon="label"
         >
-        </b-taginput>
+        </b-taginput> -->
       </b-field>
       <!-- // traceID -->
 
@@ -152,7 +155,7 @@
         :key="`param_${i}`"
         label-position="on-border"
       >
-        <b-taginput
+        <!-- <b-taginput
           v-if="isListValue(param.operator)"
           v-model="param.value.list"
           autocomplete
@@ -163,7 +166,15 @@
           icon-right-clickable
           @icon-right-click="removeParam(i)"
         >
-        </b-taginput>
+        </b-taginput> -->
+        <compos v-if="isListValue(param.operator)"
+          :vmodstring="param.value.list"
+          phtext="Value"
+          icon-right="close-circle"
+          icon-right-clickable
+          @icon-right-click="removeParam(i)"
+        >
+        </compos>
         <b-input
           v-else
           :placeholder="param.key"
@@ -180,7 +191,8 @@
       <template v-if="showAdditionalParam">
         <!-- host -->
         <b-field label="Host" label-position="on-border">
-          <b-taginput
+          <compos :vmodstring="form.host" :datar="hosts" phtext="Host"></compos>
+          <!-- <b-taginput
             v-model="form.host"
             :data="hosts"
             autocomplete
@@ -190,33 +202,35 @@
             @typing="getHostList"
             icon="label"
           >
-          </b-taginput>
+          </b-taginput> -->
         </b-field>
         <!-- // host -->
 
         <!-- Build commit -->
         <b-field label="Build commit" label-position="on-border">
-          <b-taginput
+          <compos :vmodstring="form.buildCommit" phtext="Build commit"></compos>
+          <!-- <b-taginput
             v-model="form.buildCommit"
             autocomplete
             :allow-new="true"
             placeholder="Build commit"
             icon="label"
-          >
-          </b-taginput>
+          > -->
+          <!-- </b-taginput> -->
         </b-field>
         <!-- // Build commit -->
 
         <!-- Config Hash -->
         <b-field label="Config hash" label-position="on-border">
-          <b-taginput
+          <compos :vmodstring="form.configHash" phtext="Config hash"></compos>
+          <!-- <b-taginput
             v-model="form.configHash"
             autocomplete
             :allow-new="true"
             placeholder="Config hash"
             icon="label"
-          >
-          </b-taginput>
+          > -->
+          <!-- </b-taginput> -->
         </b-field>
         <!-- // Config Hash -->
       </template>
@@ -276,21 +290,25 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Param, Form, ParamValue } from '../../types/view';
+import compos from '../../components/ComponentExample.vue';
 
 export default Vue.extend({
+  components: {
+    compos,
+  },
   data() {
     return {
       loading: true,
       form: {
         startTime: new Date(new Date().getTime() - 1000 * 60),
         endTime: null,
-        namespace: [] as string[],
-        source: [] as string[],
-        traceID: [] as string[],
-        host: [] as string[],
-        level: [] as string[],
-        buildCommit: '',
-        configHash: '',
+        // namespace: [] as string[],
+        // source: [] as string[],
+        // traceID: [] as string[],
+        // host: [] as string[],
+        // level: [] as string[],
+        // buildCommit: '',
+        // configHash: '',
         message: '',
       } as Form,
       params: [] as Param[],
@@ -322,18 +340,18 @@ export default Vue.extend({
     },
   },
   methods: {
-    getSourceList(val: string): void {
-      console.log(val);
-    },
-    getHostList(val: string): void {
-      console.log(val);
-    },
-    getNamespaceList(val: string): void {
-      console.log(val);
-    },
-    getLevelList(val: string): void {
-      console.log(val);
-    },
+    // getSourceList(val: string): void {
+    //   console.log(val);
+    // },
+    // getHostList(val: string): void {
+    //   console.log(val);
+    // },
+    // getNamespaceList(val: string): void {
+    //   console.log(val);
+    // },
+    // getLevelList(val: string): void {
+    //   console.log(val);
+    // },
     saveParam(): void {
       this.showAddParam = false;
 
